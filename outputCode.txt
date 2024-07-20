@@ -1,0 +1,122 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Random;
+
+public class DefenderGame extends JPanel implements ActionListener {
+    private static final int WIDTH = 800;
+    private static final int HEIGHT = 600;
+    private static final int PLAYER_WIDTH = 50;
+    private static final int PLAYER_HEIGHT = 30;
+    private static final int PLAYER_SPEED = 5;
+    private static final int ENEMY_WIDTH = 40;
+    private static final int ENEMY_HEIGHT = 40;
+    private static final int BULLET_WIDTH = 5;
+    private static final int BULLET_HEIGHT = 5;
+    private static final int BULLET_SPEED = 10;
+    private static final int ENEMY_SPEED = 2;
+
+    private int playerX = 50;
+    private int playerY = HEIGHT / 2;
+    private ArrayList<int[]> bullets = new ArrayList<>();
+    private ArrayList<int[]> enemies = new ArrayList<>();
+    private boolean running = true;
+    private Timer timer;
+    private Random random = new Random();
+
+    public DefenderGame() {
+        JFrame frame = new JFrame("Defender-like Game");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(WIDTH, HEIGHT);
+        frame.add(this);
+        frame.setVisible(true);
+        frame.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    bullets.add(new int[]{playerX + PLAYER_WIDTH, playerY + PLAYER_HEIGHT / 2});
+                }
+            }
+        });
+        timer = new Timer(1000 / 60, this);
+        timer.start();
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        if (running) {
+            movePlayer();
+            moveBullets();
+            spawnEnemies();
+            moveEnemies();
+            checkCollisions();
+            repaint();
+        }
+    }
+
+    private void movePlayer() {
+        if (playerY > 0 && (KeyEvent.getKeyModifiersText(KeyEvent.VK_UP).equals("Pressed"))) {
+            playerY -= PLAYER_SPEED;
+        }
+        if (playerY < HEIGHT - PLAYER_HEIGHT && (KeyEvent.getKeyModifiersText(KeyEvent.VK_DOWN).equals("Pressed"))) {
+            playerY += PLAYER_SPEED;
+        }
+    }
+
+    private void moveBullets() {
+        for (int i = bullets.size() - 1; i >= 0; i--) {
+            bullets.get(i)[0] += BULLET_SPEED;
+            if (bullets.get(i)[0] > WIDTH) {
+                bullets.remove(i);
+            }
+        }
+    }
+
+    private void spawnEnemies() {
+        if (random.nextInt(60) == 0) {
+            enemies.add(new int[]{WIDTH, random.nextInt(HEIGHT - ENEMY_HEIGHT)});
+        }
+    }
+
+    private void moveEnemies() {
+        for (int i = enemies.size() - 1; i >= 0; i--) {
+            enemies.get(i)[0] -= ENEMY_SPEED;
+            if (enemies.get(i)[0] < 0) {
+                enemies.remove(i);
+            }
+        }
+    }
+
+    private void checkCollisions() {
+        for (int i = enemies.size() - 1; i >= 0; i--) {
+            for (int j = bullets.size() - 1; j >= 0; j--) {
+                if (enemies.get(i)[0] < bullets.get(j)[0] && bullets.get(j)[0] < enemies.get(i)[0] + ENEMY_WIDTH &&
+                    enemies.get(i)[1] < bullets.get(j)[1] && bullets.get(j)[1] < enemies.get(i)[1] + ENEMY_HEIGHT) {
+                    enemies.remove(i);
+                    bullets.remove(j);
+                    break;
+                }
+            }
+        }
+    }
+
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, WIDTH, HEIGHT);
+        g.setColor(Color.GREEN);
+        g.fillRect(playerX, playerY, PLAYER_WIDTH, PLAYER_HEIGHT);
+        g.setColor(Color.RED);
+        for (int[] enemy : enemies) {
+            g.fillRect(enemy[0], enemy[1], ENEMY_WIDTH, ENEMY_HEIGHT);
+        }
+        g.setColor(Color.WHITE);
+        for (int[] bullet : bullets) {
+            g.fillRect(bullet[0], bullet[1], BULLET_WIDTH, BULLET_HEIGHT);
+        }
+    }
+
+    public static void main(String[] args) {
+        new DefenderGame();
+    }
+}
+
