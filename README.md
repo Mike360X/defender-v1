@@ -1,5 +1,5 @@
 # defender-v1
-## My first hosted python game created by claude sonnet AI
+## My first hosted html5 game created by claude sonnet AI
 ## The game that i requested to be coded was a defender like game.
 ## use up and down arrow keys to move the block up and down then spacebar to shoot.
 ## screenshot
